@@ -56,7 +56,7 @@ def mint(privatekey):
             return address, 'success'
         else:
             logger.info(f'{address} - пробую еще раз...')
-            mint(privatekey)
+            return mint(privatekey)
 
     except Exception as e:
         error = str(e)
