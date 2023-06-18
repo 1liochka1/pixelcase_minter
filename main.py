@@ -66,8 +66,9 @@ def mint(privatekey):
         elif "Already minted" in error:
             logger.info(f'{address} - уже заминчено')
             return address, 'already minted'
-        logger.error(e)
-        return address, 'error'
+        else:
+            logger.error(e)
+            return address, 'error'
 
 
 def main():
