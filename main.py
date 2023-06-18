@@ -63,7 +63,9 @@ def mint(privatekey):
         if "insufficient funds for gas * price + value" in error:
             logger.error(f'{address} - нет баланса нативного токена')
             return address, 'error'
-
+        elif "Already minted" in error:
+            logger.info(f'{address} - уже заминчено')
+            return address, 'already minted'
         logger.error(e)
         return address, 'error'
 
