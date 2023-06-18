@@ -5,8 +5,9 @@ from loguru import logger
 import pandas as pd
 
 from config import *
-def check_status_tx(tx_hash,w3):
 
+
+def check_status_tx(tx_hash, w3):
     logger.info(f'waiting for confirmation transaction https://etherscan.io/tx/{w3.to_hex(tx_hash)}...')
     while True:
         try:
@@ -17,9 +18,12 @@ def check_status_tx(tx_hash,w3):
             time.sleep(1)
         except Exception as error:
             time.sleep(1)
+
+
 def sleep_indicator(secs):
     for i in tqdm(range(secs), desc='wait', bar_format="{desc}: {n_fmt}s / {total_fmt}s {bar}", colour='green'):
         time.sleep(1)
+
 
 def mint(privatekey):
     w3 = Web3(Web3.HTTPProvider('https://1rpc.io/zksync2-era'))
@@ -40,29 +44,36 @@ def mint(privatekey):
 
         tx['gas'] = w3.eth.estimate_gas(tx)
         sign = account.sign_transaction(tx)
-        hash = w3.eth.send_raw_transaction(sign.rawTransaction)
-        status = check_status_tx(hash, w3)
+        hash_ = w3.eth.send_raw_transaction(sign.rawTransaction)
+        status = check_status_tx(hash_, w3)
         if status == 1:
-            logger.success(f'{address} - успешно заминтил: https://explorer.zksync.io/tx/{w3.to_hex(hash)}...')
+            logger.success(f'{address} - успешно заминтил: https://explorer.zksync.io/tx/{w3.to_hex(hash_)}...')
             sleep_indicator(random.randint(delay[0], delay[1]))
             return address, 'success'
 
     except Exception as e:
+        error = str(e)
+        if "insufficient funds for gas * price + value" in error:
+            logger.error(f'{address} - нет баланса нативного токена')
+            return address, 'error'
+
         logger.error(e)
         return address, 'error'
 
+
 def main():
     print(f'\n{" " * 32}автор - https://t.me/iliocka{" " * 32}\n')
-    wallets, results = [],[]
+    wallets, results = [], []
     for key in keys:
         res = mint(key)
         wallets.append(res[0]), results.append(res[1])
     logger.success(f'Успешный mинетинг на {len(keys)} кошельков, таблица с резами загружена...')
     res = {'address': wallets, 'result': results}
     df = pd.DataFrame(res)
-    df.to_csv('results.csv',mode='a', index=False)
+    df.to_csv('results.csv', mode='a', index=False)
     print(f'\n{" " * 32}donate - EVM 0xFD6594D11b13C6b1756E328cc13aC26742dBa868{" " * 32}\n')
     print(f'\n{" " * 32}donate - trc20 TMmL915TX2CAPkh9SgF31U4Trr32NStRBp{" " * 32}\n')
+
 
 if __name__ == '__main__':
     main()
