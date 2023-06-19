@@ -60,11 +60,12 @@ def mint(privatekey):
 
     except Exception as e:
         error = str(e)
-        if "insufficient funds for gas * price + value" in error:
-            logger.error(f'{address} - нет баланса нативного токена')
+        if "insufficient funds for gas * price + value" in error or "insufficient funds for gas + value" in error:
+            logger.error(f'{address} - нет баланса нативного токена...')
             return address, 'error'
+
         elif "Already minted" in error:
-            logger.info(f'{address} - уже заминчено')
+            logger.info(f'{address} - уже заминчено...')
             return address, 'already minted'
         else:
             logger.error(e)
